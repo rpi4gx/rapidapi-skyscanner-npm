@@ -4,16 +4,16 @@
 
 ---
 ### Getting started
-```
+```bash
 $ npm install rapidapi-skyscanner
 ```
 ### Examples:
 All examples require an environment variable `RAPIDAPI_KEY` set to the user's key.
-```
+```bash
 $ export RAPIDAPI_KEY=my_key_from_rapidapi_here
 ```
 #### One way flight search:
-```
+```js
 const skyscanner = require('rapidapi-skyscanner')
 import { FlightQuery, CabinClass } from "rapidapi-skyscanner"
 
@@ -50,7 +50,7 @@ import { FlightQuery, CabinClass } from "rapidapi-skyscanner"
 
 ```
 Using asynchronous API endpoints:
-```
+```js
 ...
     let response = await skyscanner.doAsyncedSearch(query)
     while (response.status == "RESULT_STATUS_INCOMPLETE") {
