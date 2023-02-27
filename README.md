@@ -18,7 +18,7 @@ const skyscanner = require('rapidapi-skyscanner')
 import { FlightQuery, CabinClass } from "rapidapi-skyscanner"
 
 (async () => {
-    let query: FlightQuery= {
+    let query: FlightQuery = {
         market: "UK",
         locale: "en-GB",
         currency: "EUR",
