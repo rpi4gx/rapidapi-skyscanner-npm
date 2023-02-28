@@ -83,7 +83,7 @@ export interface FlightQuery {
     queryLegs: QueryLeg[];
     cabinClass: CabinClass;
     adults: number;
-    childrenAges: number[];
+    childrenAges?: number[];
 }
 
 function generateOptions(method: string, url: string, key?: string): any {
