@@ -86,6 +86,19 @@ export interface FlightQuery {
     childrenAges?: number[];
 }
 
+export interface HotelQuery {
+    market: string,
+    locale: string,
+    currency: string,
+    placeId: PlaceId,
+    checkInDate: Date,
+    checkOutDate: Date,
+    adults: number,
+    rooms: number,
+    childrenAges?: number[],
+    sortBy: string
+}
+
 function generateOptions(method: string, url: string, key?: string): any {
     if (key === undefined && process.env[EpEnvVar] && process.env[EpEnvVar].length > 0) {
         key = process.env[EpEnvVar]
@@ -102,7 +115,7 @@ function generateOptions(method: string, url: string, key?: string): any {
     return options
 }
 
-export async function getLocales(key?: string): Promise<Locale[]> {
+export async function locales(key?: string): Promise<Locale[]> {
     let options = generateOptions("GET", "https://skyscanner-api.p.rapidapi.com/v3/culture/locales", key)
     let result = await axios.request(options)
     if (result.data.status == "RESULT_STATUS_COMPLETE") {
@@ -111,7 +124,7 @@ export async function getLocales(key?: string): Promise<Locale[]> {
     throw new SkyscannerError(`failure retrieving locales: ${JSON.stringify(result.data)}`)
 }
 
-export async function getMarkets(locale: string, key?: string): Promise<Market[]> {
+export async function markets(locale: string, key?: string): Promise<Market[]> {
     let options = generateOptions("GET", `https://skyscanner-api.p.rapidapi.com/v3/culture/markets/${locale}`, key)
     let result = await axios.request(options)
     if (result.data.status == "RESULT_STATUS_COMPLETE") {
@@ -120,7 +133,7 @@ export async function getMarkets(locale: string, key?: string): Promise<Market[]
     throw new SkyscannerError(`failure retrieving markets: ${JSON.stringify(result.data)}`)
 }
 
-export async function getCurrencies(key?: string): Promise<Currency[]> {
+export async function currencies(key?: string): Promise<Currency[]> {
     let options = generateOptions("GET", `https://skyscanner-api.p.rapidapi.com/v3/culture/currencies`, key)
     let result = await axios.request(options)
     if (result.data.status == "RESULT_STATUS_COMPLETE") {
@@ -129,7 +142,7 @@ export async function getCurrencies(key?: string): Promise<Currency[]> {
     throw new SkyscannerError(`failure retrieving currencies: ${JSON.stringify(result.data)}`)
 }
 
-export async function getCarriers(key?: string): Promise<Map<string, Carrier>> {
+export async function carriers(key?: string): Promise<Map<string, Carrier>> {
     let options = generateOptions("GET", `https://skyscanner-api.p.rapidapi.com/v3/flights/carriers`, key)
     let result = await axios.request(options)
     if (result.data.status == "RESULT_STATUS_COMPLETE") {
@@ -138,7 +151,7 @@ export async function getCarriers(key?: string): Promise<Map<string, Carrier>> {
     throw new SkyscannerError(`failure retrieving carriers: ${JSON.stringify(result.data)}`)
 }
 
-export async function getLocations(locale: string, key?: string): Promise<Map<string, Location>> {
+export async function locations(locale: string, key?: string): Promise<Map<string, Location>> {
     let options = generateOptions("GET", `https://skyscanner-api.p.rapidapi.com/v3/geo/hierarchy/flights/${locale}`, key)
     let result = await axios.request(options)
     if (result.data.status == "RESULT_STATUS_COMPLETE") {
@@ -147,7 +160,7 @@ export async function getLocations(locale: string, key?: string): Promise<Map<st
     throw new SkyscannerError(`failure retrieving locations: ${JSON.stringify(result.data)}`)
 }
 
-export async function doSyncedSearch(query: FlightQuery, key?: string) {
+export async function flightSyncSearch(query: FlightQuery, key?: string) {
     let options = generateOptions("POST", `https://skyscanner-api.p.rapidapi.com/v3e/flights/live/search/synced`, key)
     options['data'] = { query }
     let result = await axios.request(options)
@@ -157,7 +170,7 @@ export async function doSyncedSearch(query: FlightQuery, key?: string) {
     throw new SkyscannerError(`failure running search: ${JSON.stringify(result.data)}`) 
 }
 
-export async function doAsyncedSearch(query: FlightQuery, key?: string) {
+export async function flightAsyncCreateSearch(query: FlightQuery, key?: string) {
     let options = generateOptions("POST", `https://skyscanner-api.p.rapidapi.com/v3/flights/live/search/create`, key)
     options['data'] = { query }
     let result = await axios.request(options)
@@ -167,10 +180,29 @@ export async function doAsyncedSearch(query: FlightQuery, key?: string) {
     throw new SkyscannerError(`failure running search: ${JSON.stringify(result.data)}`) 
 }
 
-export async function doAsyncedPoll(sessionToken: string, key?: string) {
+export async function flightAsyncPollSearch(sessionToken: string, key?: string) {
     let options = generateOptions("GET", `https://skyscanner-api.p.rapidapi.com/v3/flights/live/search/poll/${sessionToken}`, key)
     let result = await axios.request(options)
     if (result.data.status == "RESULT_STATUS_COMPLETE" || result.data.status == "RESULT_STATUS_INCOMPLETE") {
+        return result.data
+    }
+    throw new SkyscannerError(`failure running search: ${JSON.stringify(result.data)}`) 
+}
+
+export async function hotelCreateSearch(query: HotelQuery, key?: string) {
+    let options = generateOptions("POST", `https://skyscanner-api.p.rapidapi.com/v3e/hotels/live/search/create`, key)
+    options['data'] = { query }
+    let result = await axios.request(options)
+    if (result.data.sessionToken) {
+        return result.data
+    }
+    throw new SkyscannerError(`failure running search: ${JSON.stringify(result.data)}`) 
+}
+
+export async function hotelPollPageSearch(sessionToken: string, page: number, key?: string) {
+    let options = generateOptions("GET", `https://skyscanner-api.p.rapidapi.com/v3e/hotels/live/search/poll/${page}/${sessionToken}`, key)
+    let result = await axios.request(options)
+    if (result.data.sessionToken) {
         return result.data
     }
     throw new SkyscannerError(`failure running search: ${JSON.stringify(result.data)}`) 
