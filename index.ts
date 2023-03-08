@@ -99,6 +99,18 @@ export interface HotelQuery {
     sortBy: string
 }
 
+export interface AutosuggestFlightQuery {
+    market: string,
+    locale: string,
+    searchTerm: string,
+}
+
+export interface AutosuggestHotelQuery {
+    market: string,
+    locale: string,
+    searchTerm: string,
+}
+
 function generateOptions(method: string, url: string, key?: string): any {
     if (key === undefined && process.env[EpEnvVar] && process.env[EpEnvVar].length > 0) {
         key = process.env[EpEnvVar]
@@ -193,17 +205,25 @@ export async function hotelCreateSearch(query: HotelQuery, key?: string) {
     let options = generateOptions("POST", `https://skyscanner-api.p.rapidapi.com/v3e/hotels/live/search/create`, key)
     options['data'] = { query }
     let result = await axios.request(options)
-    if (result.data.sessionToken) {
-        return result.data
-    }
-    throw new SkyscannerError(`failure running search: ${JSON.stringify(result.data)}`) 
+    return result.data
 }
 
 export async function hotelPollPageSearch(sessionToken: string, page: number, key?: string) {
     let options = generateOptions("GET", `https://skyscanner-api.p.rapidapi.com/v3e/hotels/live/search/poll/${page}/${sessionToken}`, key)
     let result = await axios.request(options)
-    if (result.data.sessionToken) {
-        return result.data
-    }
-    throw new SkyscannerError(`failure running search: ${JSON.stringify(result.data)}`) 
+    return result.data
+}
+
+export async function autosuggestFlights(query: AutosuggestFlightQuery, key?: string) {
+    let options = generateOptions("POST", `https://skyscanner-api.p.rapidapi.com/v3/autosuggest/flights`, key)
+    options['data'] = { query }
+    let result = await axios.request(options)
+    return result.data
+}
+
+export async function autosuggestHotels(query: AutosuggestHotelQuery, key?: string) {
+    let options = generateOptions("POST", `https://skyscanner-api.p.rapidapi.com/v3/autosuggest/hotels`, key)
+    options['data'] = { query }
+    let result = await axios.request(options)
+    return result.data
 }
